@@ -12,16 +12,22 @@ namespace Interpreter
         private Token _token;
         private char _charAt;
         private int _printPosition;
+        private int _firstChar;
 
         char[] intCollection = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
         char[] operators = new char[] { '+', '-', '*', '/' };
         char[] letters = new char[] {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
 
-        public Lexer(string code)
+        public Lexer()
         {
-            _code = code;
-            _charAt = 'a';
-            _position = -1;
+            
+
+        }
+
+        public string GetCode()
+        {
+            _code = Console.ReadLine();
+            return _code;
         }
 
 
@@ -144,29 +150,70 @@ namespace Interpreter
         }
 
 
-        public string Word()
+        public int FirstChar()
         {
-            string value = "";
-            _printPosition = 0;
-            try
+            _firstChar = 0;
+
+            while(_code[_firstChar] == ' ')
             {
-                if(_code[_printPosition] == ' ')
-                {
-                    _printPosition++;
-                }
-                while (_code[_printPosition] != ' ')
-                {
-                    value += _code[_printPosition].ToString();
-                    _printPosition++;
-                }
-                return value;
+                _firstChar++;
             }
-            catch(Exception e)
-            {
-                return value;
-            }
+
+            return _firstChar;
+
         }
 
+
+        public string GetWord(int startChar)
+        {
+            
+            
+            string value = "";
+
+            while(_code[startChar] == ' ')
+            {
+                startChar++;
+            }
+
+            while (_code[startChar] != ' ')
+            {
+                value += _code[startChar];
+                startChar++;
+                _printPosition++;
+            }
+            
+            _printPosition = startChar;
+            return value;
+        }
+
+        public string GetKeyword(string value)
+        {
+                
+                switch (value.Trim())
+                {
+                    case "print":
+                        string stringValue = "";
+                        while(_code[_printPosition] == ' ')
+                        {
+                            _printPosition++;
+                        }
+                        while(_printPosition < _code.Length)
+                        {
+                            stringValue += _code[_printPosition].ToString();
+                            _printPosition++;
+                        }
+                        
+                        return stringValue;
+                    case "num":
+                        return "";
+                    case "string":
+                        return "";
+                       
+                }
+                return "";
+            
+        }
+        /*
         public string PrintStatement()
         {
             string value = "";
@@ -179,7 +226,7 @@ namespace Interpreter
             }
             return value;
         }
-
+        */
 
         public int PrecedenceNumber(char input)
         {
@@ -236,9 +283,11 @@ namespace Interpreter
 
         public string Run() //was Token
         {
-            if (IsNum(_code[0])){
-                Lexer lex = new Lexer(_code);
-                Queue<Token> tl = lex.Tokenize();
+            Lexer classLexer = new Lexer();
+            GetCode();
+            FirstChar();
+            if (IsNum(_code[_firstChar])){
+                Queue<Token> tl = classLexer.Tokenize();
                 Stack<char> opStack = new Stack<char>();
                 Stack<string> numAsString = new Stack<string>();
                 string numsToAdd = "";
@@ -299,9 +348,12 @@ namespace Interpreter
 
                 return numAsString.Pop();
             } //end of number block
-            else if(Word() == "print")
+            else if(IsLetter(_code[_firstChar]))
             {
-                return PrintStatement();
+                string firstWord = GetWord(_firstChar);
+                return GetKeyword(firstWord);
+
+                //return PrintStatement();
             }
             else
             {

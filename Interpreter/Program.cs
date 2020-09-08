@@ -10,9 +10,8 @@ namespace Interpreter
         {
             while (true)
             {
-                string a = Console.ReadLine();
+                Lexer lex = new Lexer();
 
-                Lexer lex = new Lexer(a);
                 Console.WriteLine(lex.Run());
 
             }
