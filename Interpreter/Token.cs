@@ -6,13 +6,11 @@ namespace Interpreter
 {
     class Token
     {
-        private string _type;
         private char _value;
 
 
-        public Token(string type, char value)
+        public Token(char value)
         {
-            _type = type;
             _value = value;
         }
 
