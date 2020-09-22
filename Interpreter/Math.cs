@@ -6,7 +6,7 @@ namespace Interpreter
 {
     class Math
     {
-        private string _input;
+        private readonly string _input;
         public Math(string input)
         {
             _input = input;
