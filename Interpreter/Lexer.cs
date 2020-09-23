@@ -8,11 +8,13 @@ namespace Interpreter
     class Lexer
     {
         private readonly string _code;
+        private int _printPosition;
         public Lexer(string code)
         {
             _code = code;
+            _printPosition = 0;
         }
-
+        
         public Queue<Token> Tokenizer()
         {
             Queue<Token> tokenQueue = new Queue<Token>();
@@ -28,73 +30,6 @@ namespace Interpreter
                 }
             }
             return tokenQueue;
-        }
-
-        public string Evaluator(Queue<Token> tokenQueue)
-        {
-            Stack<Token> opStack = new Stack<Token>();
-            Stack<double> numStack = new Stack<double>();
-            Stack<string> rightSide = new Stack<string>();
-            string numAsString = "";
-
-            for (int i = 0; i < tokenQueue.Count; i++)
-            {
-                
-                Token t = tokenQueue.Dequeue();
-                if (IsNum(t.GetTokenValue()))
-                {
-                    
-                    numAsString += t.GetTokenValue().ToString();
-                    while (tokenQueue.Count != 0 && IsNum(tokenQueue.Peek().GetTokenValue()))
-                    {
-                        numAsString += tokenQueue.Dequeue().GetTokenValue().ToString();
-                    }
-                    numStack.Push(Double.Parse(numAsString));
-                }
-                else if (IsOperator(t.GetTokenValue()))
-                {
-                    if (opStack.Count == 0)
-                    {
-                        opStack.Push(t);
-                    }
-                    else
-                    {
-                        if(ComparePrecedence(opStack.Peek().GetTokenValue(), t.GetTokenValue()))
-                        {
-                            numStack.Push(Solve(opStack.Pop().GetTokenValue(), Double.Parse(rightSide.Pop()), Double.Parse(rightSide.Pop())));
-                            opStack.Push(t);
-                        }
-                        else
-                        {
-                            numStack.Push(Solve(t.GetTokenValue(), Double.Parse(rightSide.Pop()), Double.Parse(rightSide.Pop())));
-                        }
-                    }
-                }
-                else
-                {
-                    throw new Exception("error");
-                }
-            }
-            /*
-            if (numAsString != "")
-            {
-                rightSide.Push(numAsString);
-            }
-            */
-            
-            string toAdd = "";
-            for (int i = 0; i < tokenQueue.Count; i++)
-            {
-                tokenQueue.Dequeue();
-            }
-            numStack.Push(Double.Parse(toAdd));
-            return tokenQueue.Count.ToString();
-
-            for (int i = 0; i < opStack.Count; i++)
-            {
-                numStack.Push(Solve(opStack.Pop().GetTokenValue(), Double.Parse(rightSide.Pop()), Double.Parse(rightSide.Pop())));
-            }
-            return numStack.Pop().ToString();
         }
 
 
@@ -125,49 +60,6 @@ namespace Interpreter
             return false;
         }
 
-        public int PrecedenceNumber(char input)
-        {
-            if (input == '+' || input == '-')
-            {
-                return 0;
-            }
-            else if(input == '*' || input == '/')
-            {
-                return 1;
-            }
-            throw new Exception("error");
-        }
-
-        public Boolean ComparePrecedence(char first, char second)
-        {
-            int firstInt = PrecedenceNumber(first);
-            int secondInt = PrecedenceNumber(second);
-
-            if (firstInt > secondInt || firstInt == secondInt)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public double Solve(char o, double number2, double number1)
-        {
-            switch (o)
-            {
-                case '+':
-                    return (number1 + number2);
-                case '-':
-                    return (number1 - number2);
-                case '*':
-                    return (number1 * number2);
-                case '/':
-                    return (number1 / number2);
-            }
-            throw new Exception("error");
-        }
 
         public char GetFirstChar()
         {
@@ -184,21 +76,28 @@ namespace Interpreter
         public string GetFirstWord()
         {
             string value = "";
-            int i = 0;
-            while (_code[i] == ' ')
+            while (_code[_printPosition] == ' ')
             {
-                i++;
+                _printPosition++;
             }
-            while(i < _code.Length && _code[i] != ' ')
+            while(_printPosition < _code.Length && _code[_printPosition] != ' ')
             {
-                value += _code[i];
-                i++;
+                if(_code[_printPosition] == '(')
+                {
+                    return value;
+                }
+                value += _code[_printPosition];
+                _printPosition++;
             }
             return value;
         }
 
         public string Run()
         {
+            if(_code.Length == 0)
+            {
+                return "";
+            }
             char firstChar = GetFirstChar();
             if (IsNum(firstChar))
             {
@@ -207,7 +106,13 @@ namespace Interpreter
             }
             else
             {
-                return GetFirstWord();
+                string firstWord =  GetFirstWord();
+                if (firstWord == "print")
+                {
+                    Print printClass = new Print(_code);
+                    return printClass.ConsolePrint(_printPosition);
+                }
+                return "L";
             }
         }
     }
