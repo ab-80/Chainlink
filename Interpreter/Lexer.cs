@@ -181,6 +181,22 @@ namespace Interpreter
             return '!';
         }
 
+        public string GetFirstWord()
+        {
+            string value = "";
+            int i = 0;
+            while (_code[i] == ' ')
+            {
+                i++;
+            }
+            while(i < _code.Length && _code[i] != ' ')
+            {
+                value += _code[i];
+                i++;
+            }
+            return value;
+        }
+
         public string Run()
         {
             char firstChar = GetFirstChar();
@@ -189,7 +205,10 @@ namespace Interpreter
                 Math mathClass = new Math(_code);
                 return mathClass.EvalPostfix().ToString();
             }
-            return "fail";
+            else
+            {
+                return GetFirstWord();
+            }
         }
     }
 }
